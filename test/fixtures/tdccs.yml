@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  stock_number: MyString
+  date: 2016-06-20
+  group: MyString
+  people: 1
+  shares: 1
+  percent: 1.5
+
+two:
+  stock_number: MyString
+  date: 2016-06-20
+  group: MyString
+  people: 1
+  shares: 1
+  percent: 1.5
