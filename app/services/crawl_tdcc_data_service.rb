@@ -11,6 +11,7 @@ class CrawlTdccDataService
     def fetch_all_data
         table_data = Array.new(15)
         targetURL = "http://www.tdcc.com.tw/smWeb/QryStock.jsp"
+        dates = fetch_all_date(targetURL)
         all_stocks = fetch_all_stock_number
         all_stocks.each do |stock|
             url = targetURL + '?SCA_DATE=' + '20160617' + '&SqlMethod=StockNo&StockNo=' + stock + '&StockName=&sub=%ACd%B8%DF'
@@ -61,5 +62,18 @@ class CrawlTdccDataService
             end
         end
         return stock_list
+    end
+    
+    def fetch_all_date(targetURL)
+        # return a list of all the dates 
+        dates = []
+        open_url = open(targetURL)
+        date_tmp = Nokogiri::HTML(open_url).css("option")
+        
+        date_tmp.each do |date_t|
+            dates << date_t.inner_text
+        end
+        
+        return dates
     end
 end
