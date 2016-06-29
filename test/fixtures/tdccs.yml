@@ -2,7 +2,8 @@
 
 one:
   stock_number: MyString
-  date: 2016-06-20
+  stock_name: MyString
+  date: 2016-06-28
   group: MyString
   people: 1
   shares: 1
@@ -10,7 +11,8 @@ one:
 
 two:
   stock_number: MyString
-  date: 2016-06-20
+  stock_name: MyString
+  date: 2016-06-28
   group: MyString
   people: 1
   shares: 1

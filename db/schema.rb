@@ -11,10 +11,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160620022833) do
+ActiveRecord::Schema.define(version: 20160628054512) do
 
   create_table "tdccs", force: :cascade do |t|
     t.string   "stock_number"
+    t.string   "stock_name"
     t.date     "date"
     t.string   "group"
     t.integer  "people"
