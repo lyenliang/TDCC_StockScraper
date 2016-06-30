@@ -42,9 +42,9 @@ class CrawlTdccDataService
                         tdcc.stock_number = stock_number
                         tdcc.stock_name = stock_name
                         tdcc.date = date
-                        tdcc.group = cells[1].inner_text
-                        tdcc.people = cells[2].inner_text
-                        tdcc.shares = cells[3].inner_text
+                        tdcc.share_group = cells[1].inner_text
+                        tdcc.people = cells[2].inner_text.gsub(/,/, '')
+                        tdcc.shares = cells[3].inner_text.gsub(/,/, '')
                         tdcc.percent = cells[4].inner_text
                         tdcc.save
                     end

@@ -17,7 +17,7 @@ ActiveRecord::Schema.define(version: 20160628054512) do
     t.string   "stock_number"
     t.string   "stock_name"
     t.date     "date"
-    t.string   "group"
+    t.string   "share_group"
     t.integer  "people"
     t.integer  "shares"
     t.float    "percent"
