@@ -1,24 +1,3 @@
+將[集保戶股權分散表查詢(]http://www.tdcc.com.tw/smWeb/QryStock.jsp)的資料全部抓到 sqlite 資料庫裡，方便日後語法查詢
 
-     ,-----.,--.                  ,--. ,---.   ,--.,------.  ,------.
-    '  .--./|  | ,---. ,--.,--. ,-|  || o   \  |  ||  .-.  \ |  .---'
-    |  |    |  || .-. ||  ||  |' .-. |`..'  |  |  ||  |  \  :|  `--, 
-    '  '--'\|  |' '-' ''  ''  '\ `-' | .'  /   |  ||  '--'  /|  `---.
-     `-----'`--' `---'  `----'  `---'  `--'    `--'`-------' `------'
-    ----------------------------------------------------------------- 
-
-
-Welcome to your Rails project on Cloud9 IDE!
-
-To get started, just do the following:
-
-1. Run the project with the "Run Project" button in the menu bar on top of the IDE.
-2. Preview your new app by clicking on the URL that appears in the Run panel below (https://tdcc-lyenliang.c9users.io/).
-
-Happy coding!
-The Cloud9 IDE team
-
-
-## Support & Documentation
-
-Visit http://docs.c9.io for support, or to learn more about using Cloud9 IDE. 
-To watch some training videos, visit http://www.youtube.com/user/c9ide
+上市上櫃的股票代碼是從 http://www.emega.com.tw/js/StockTable.htm 來的

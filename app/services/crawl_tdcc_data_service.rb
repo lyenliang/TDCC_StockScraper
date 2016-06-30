@@ -13,7 +13,7 @@ class CrawlTdccDataService
         targetURL = "http://www.tdcc.com.tw/smWeb/QryStock.jsp"
         dates = fetch_all_date(targetURL)
         all_stocks = fetch_all_stock_number
-        byebug
+        
         all_stocks.each do |stock|
             dates.each do |date|
                 begin
