@@ -7,3 +7,4 @@ Starting mysql server on Cloud9: `mysql-ctl start`
 Debugging the program: `ruby -r debug tdcc_ruby.rb`
 
 Starting the program: `ruby tdcc_ruby.rb`
+

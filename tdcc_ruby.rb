@@ -14,7 +14,10 @@ require 'nokogiri'
 @client = Mysql2::Client.new(:host => @db_host, :username => @db_user)
 @client.query("USE #{@db_name}")
 
-
+def init()
+    reset()
+    fetch_all_data    
+end
 
 def reset()
     @client.query("DROP DATABASE IF EXISTS #{@db_name};")
@@ -23,20 +26,20 @@ def reset()
     @client.query("CREATE TABLE #{@table_name} (stock_number VARCHAR(255), stock_name VARCHAR(255), date DATE, share_group VARCHAR(255), people INT, shares INT, percent FLOAT);")
 end
 
-def insert(snumber, sname, d, sgroup, people, ss, pt)
+def insert_db(snumber, sname, d, sgroup, people, ss, pt)
     @client.query("INSERT INTO #{@table_name} (stock_number, stock_name, date, share_group, people, shares, percent) 
             VALUES ('#{snumber}', '#{sname}', '#{d}', '#{sgroup}', '#{people}', '#{ss}', '#{pt}');")
 end
 
 def fetch_all_data
-    dates = fetch_all_date
+    dates = fetch_all_dates
     all_stocks = fetch_all_stock_number
     
     all_stocks.each do |stock|
         dates.each do |date|
             fetch_single_date(stock, date)
-        end # end of dates.each
-    end # end of all_stocks.each
+        end
+    end
 end
 
 def fetch_single_date(stock, date)
@@ -61,7 +64,7 @@ def fetch_single_date(stock, date)
         
         for i in 1..15
             cells = rows[i].css("td")
-            insert(stock_number, stock_name, date, cells[1].inner_text, cells[2].inner_text.gsub(/,/, ''), cells[3].inner_text.gsub(/,/, ''), cells[4].inner_text)
+            insert_db(stock_number, stock_name, date, cells[1].inner_text, cells[2].inner_text.gsub(/,/, ''), cells[3].inner_text.gsub(/,/, ''), cells[4].inner_text)
         end
     
     rescue Exception => e
@@ -87,7 +90,7 @@ def fetch_all_stock_number
     return stock_list
 end
 
-def fetch_all_date
+def fetch_all_dates
     # return a list of all the dates 
     dates = []
     open_url = open(@tdcc_url)
@@ -106,9 +109,32 @@ def fetch_db_latest_date
     return date_s
 end
 
-#reset()
-fetch_all_data
+def truncate_old_dates(last_date, all_dates)
+    last_date_format = last_date.gsub(/-/, '')
+    index = all_dates.index(last_date_format)
+    if index > 0
+        length = index + 1
+        return all_dates[0, length]
+    else 
+        return all_dates[0,0]
+    end
+end
 
-#fetch_db_latest_date
+def fetch_new_data
+    last_date = fetch_db_latest_date
+    all_dates = fetch_all_dates
+    new_dates = truncate_old_dates(last_date, all_dates)
+    all_stocks = fetch_all_stock_number
+    
+    all_stocks.each do |stock|
+        new_dates.each do |date|
+            fetch_single_date(stock, date)
+        end
+    end    
+end
+
+# init()
+
+fetch_new_data
 
 @client.close
