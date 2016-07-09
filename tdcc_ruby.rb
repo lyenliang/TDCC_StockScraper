@@ -154,7 +154,7 @@ def truncate_old_dates(last_date, all_dates)
     last_date_format = last_date.gsub(/-/, '')
     index = all_dates.index(last_date_format)
     if index > 0
-        length = index + 1
+        length = index
         return all_dates[0, length]
     else
         return all_dates[0,0]
