@@ -232,9 +232,13 @@ def fetch_stock_exchange(stock, date)
     rows = web_data.inner_text.split(/\r?\n/)
     for i in 2..(rows.size-3)
         date_price = rows[i].split(/,/)
+        closing_price = date_price[1]
+        if closing_price == '--'
+            next
+        end
         date = date_price[0]
         date = transform_date(date)
-        closing_price = date_price[1]
+        
         insert_price_table(stock, date, closing_price)
     end
 end
