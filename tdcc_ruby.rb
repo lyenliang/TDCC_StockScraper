@@ -2,10 +2,6 @@ require 'mysql2'
 require 'open-uri'
 require 'nokogiri'
 
-# 上市: http://isin.twse.com.tw/isin/C_public.jsp?strMode=2
-# 上櫃: http://isin.twse.com.tw/isin/C_public.jsp?strMode=4
-# 興櫃: http://isin.twse.com.tw/isin/C_public.jsp?strMode=5
-
 @db_host = "localhost"
 @db_user = "lyenliang"
 @db_pass = "somepass"
@@ -19,13 +15,20 @@ require 'nokogiri'
 @otc_price = "http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43_download.php"
 @exchange_market_price = "http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY_AVG/STOCK_DAY_AVG2.php"
 
-@client = Mysql2::Client.new(:host => @db_host, :username => @db_user, :password => @db_pass)
+# 上市: http://isin.twse.com.tw/isin/C_public.jsp?strMode=2
+# 上櫃: http://isin.twse.com.tw/isin/C_public.jsp?strMode=4
+# 興櫃: http://isin.twse.com.tw/isin/C_public.jsp?strMode=5
+@exchange_list_url = "http://isin.twse.com.tw/isin/C_public.jsp?strMode=2"
+@otc_list_url = "http://isin.twse.com.tw/isin/C_public.jsp?strMode=4"
+@emerging_list_url = "http://isin.twse.com.tw/isin/C_public.jsp?strMode=5"
+
+@client = Mysql2::Client.new(:host => @db_host, :username => @db_user)
 @client.query("USE #{@db_name}")
 
 def init()
     # reset()
     dates = fetch_all_dates
-    stocks = fetch_all_stock_number
+    stocks = fetch_all_stock_number2
     # fetch_tdcc_all_data(dates, stocks)
     fetch_price_all_data(dates, stocks)
 end
@@ -66,20 +69,23 @@ def insert_price_table(stock_number, date, closing_price, type)
             VALUES ('#{stock_number}', '#{date}', '#{closing_price}', '#{type}');")
 end
 
-def fetch_stock_list
-    otc = fetch_otc_list
-    exchange = fetch_exchange_list
-    emerging = fetch_emerging_list
-    return [*otc, *exchange, *emerging]
+def fetch_all_stock_number2
+    exchange = fetch_list(@exchange_list_url)
+    otc = fetch_list(@otc_list_url)
+    # emerging = fetch_list(@emerging_list_url)
+    return [*exchange, *otc]
 end
 
-def fetch_otc_list
-end
-
-def fetch_exchange_list
-end
-
-def fetch_emerging_list
+def fetch_list(target_url)
+  result_list = []
+  web_data = Nokogiri::HTML(open(target_url))
+  trs = web_data.css("tr")
+  trs.each do |tr|
+    if /^\d{4}\s/.match(tr.inner_text)
+      result_list << tr.inner_text[0, 4]
+    end
+  end
+  return result_list
 end
 
 def fetch_tdcc_all_data(dates, stocks)
@@ -123,21 +129,6 @@ def fetch_tdcc_single_date(stock, date)
         puts e.message
         puts e.backtrace.inspect
     end
-end
-
-def fetch_all_stock_number
-    # Get all the stocks from http://www.emega.com.tw/js/StockTable.htm
-    stock_list = []
-    text = Nokogiri::HTML(open(@stock_table_url)).inner_text
-    list = text.split(/\r?\n/)
-    list.each do |l|
-        if /^\d{4}/.match(l)
-            stripped_string = l.lstrip.chop
-            #puts "stripped_string: #{stripped_string}"
-            stock_list << stripped_string
-        end
-    end
-    return stock_list
 end
 
 def fetch_all_dates
