@@ -28,7 +28,7 @@ require 'nokogiri'
 def init()
     # reset()
     dates = fetch_all_dates
-    stocks = fetch_all_stock_number2
+    stocks = fetch_all_stock_number
     # fetch_tdcc_all_data(dates, stocks)
     fetch_price_all_data(dates, stocks)
 end
@@ -69,7 +69,7 @@ def insert_price_table(stock_number, date, closing_price, type)
             VALUES ('#{stock_number}', '#{date}', '#{closing_price}', '#{type}');")
 end
 
-def fetch_all_stock_number2
+def fetch_all_stock_number
     exchange = fetch_list(@exchange_list_url)
     otc = fetch_list(@otc_list_url)
     # emerging = fetch_list(@emerging_list_url)
