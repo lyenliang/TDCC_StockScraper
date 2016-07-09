@@ -2,6 +2,10 @@ require 'mysql2'
 require 'open-uri'
 require 'nokogiri'
 
+# 上市: http://isin.twse.com.tw/isin/C_public.jsp?strMode=2
+# 上櫃: http://isin.twse.com.tw/isin/C_public.jsp?strMode=4
+# 興櫃: http://isin.twse.com.tw/isin/C_public.jsp?strMode=5
+
 @db_host = "localhost"
 @db_user = "lyenliang"
 @db_pass = "somepass"
@@ -60,6 +64,22 @@ def insert_price_table(stock_number, date, closing_price, type)
     puts "type: #{type}"
     @client.query("INSERT INTO #{@stock_price_table_name} (stock_number, date, closing_price, type)
             VALUES ('#{stock_number}', '#{date}', '#{closing_price}', '#{type}');")
+end
+
+def fetch_stock_list
+    otc = fetch_otc_list
+    exchange = fetch_exchange_list
+    emerging = fetch_emerging_list
+    return [*otc, *exchange, *emerging]
+end
+
+def fetch_otc_list
+end
+
+def fetch_exchange_list
+end
+
+def fetch_emerging_list
 end
 
 def fetch_tdcc_all_data(dates, stocks)
