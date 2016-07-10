@@ -25,15 +25,15 @@ require 'nokogiri'
 @client = Mysql2::Client.new(:host => @db_host, :username => @db_user)
 @client.query("USE #{@db_name}")
 
-def init()
-    # reset()
+def rebuild_all()
+    clear_tables()
     dates = fetch_all_dates
     stocks = fetch_all_stock_number
     fetch_tdcc_all_data(dates, stocks)
-    # fetch_price_all_data(dates, stocks)
+    fetch_price_all_data(dates, stocks)
 end
 
-def reset
+def clear_tables
     # reset_db
     reset_tdcc_table
     reset_price_table
@@ -299,9 +299,19 @@ def transform_date(date)
     return ad_year + "-" + year_month_day[1] + "-" + year_month_day[2]
 end
 
-reset_price_table
-init
+update_tdcc_param = "update_tdcc"
+rebuild_param = "rebuild"
 
-# fetch_new_data
+if ARGV.size < 1
+  puts "Available parameters: #{update_tdcc_param}, #{rebuild_param}"
+else
+  if ARGV[0] == update_tdcc_param
+    fetch_new_data
+  elsif ARGV[0] == rebuild_param
+    rebuild_all
+  else
+    puts "Unrecognized parameter: #{ARGV[0]}"
+  end
+end
 
 @client.close
