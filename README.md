@@ -2,9 +2,13 @@
 
 上市上櫃的股票代碼是從 http://www.emega.com.tw/js/StockTable.htm 來的
 
+Installation: `bundle install`
+
 Starting mysql server on Cloud9: `mysql-ctl start`
 
 Debugging the program: `ruby -r debug tdcc_ruby.rb`
 
-Starting the program: `ruby tdcc_ruby.rb`
+Fetching all data: `ruby tdcc_ruby.rb rebuild`
+
+Updating stock data: `update_tdcc`
 
