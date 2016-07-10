@@ -29,8 +29,8 @@ def init()
     # reset()
     dates = fetch_all_dates
     stocks = fetch_all_stock_number
-    # fetch_tdcc_all_data(dates, stocks)
-    fetch_price_all_data(dates, stocks)
+    fetch_tdcc_all_data(dates, stocks)
+    # fetch_price_all_data(dates, stocks)
 end
 
 def reset
@@ -41,7 +41,7 @@ end
 
 def reset_tdcc_table
     @client.query("DROP TABLE IF EXISTS #{@tdcc_table_name};")
-    @client.query("CREATE TABLE #{@tdcc_table_name} (stock_number VARCHAR(255), stock_name VARCHAR(255), date DATE, share_group VARCHAR(255), people INT, shares INT, percent FLOAT);")
+    @client.query("CREATE TABLE #{@tdcc_table_name} (stock_number VARCHAR(255), stock_name VARCHAR(255), date DATE, share_group VARCHAR(255), people INT, shares INT8, percent FLOAT);")
 end
 
 def reset_price_table
@@ -89,7 +89,7 @@ def fetch_list(target_url)
 end
 
 def fetch_tdcc_all_data(dates, stocks)
-    all_stocks.each do |stock|
+    stocks.each do |stock|
         dates.each do |date|
             fetch_tdcc_single_date(stock, date)
         end
