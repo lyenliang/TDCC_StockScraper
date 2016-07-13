@@ -1,3 +1,3 @@
-Class Tdcc
+class Tdcc
 
 end
