@@ -13,7 +13,7 @@ module Tdcc
     return [*exchange, *otc]
   end
 
-  def self.def fetch_all_dates
+  def self.fetch_all_dates
       # return a list of all the dates
       dates = []
       open_url = open(@tdcc_url)
