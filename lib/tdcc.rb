@@ -1,11 +1,13 @@
 require "nokogiri"
 require "open-uri"
 
-@tdcc_url = "http://www.tdcc.com.tw/smWeb/QryStock.jsp"
-@exchange_list_url = "http://isin.twse.com.tw/isin/C_public.jsp?strMode=2"
-@otc_list_url = "http://isin.twse.com.tw/isin/C_public.jsp?strMode=4"
+
 
 module Tdcc
+  @exchange_list_url = "http://isin.twse.com.tw/isin/C_public.jsp?strMode=2"
+  @otc_list_url = "http://isin.twse.com.tw/isin/C_public.jsp?strMode=4"
+  @tdcc_url = "http://www.tdcc.com.tw/smWeb/QryStock.jsp"
+
   def self.fetch_all_stock_number
     exchange = fetch_list(@exchange_list_url)
     otc = fetch_list(@otc_list_url)
