@@ -27,6 +27,7 @@ require 'nokogiri'
 
 def rebuild_all()
     clear_tables()
+    reset_price_table
     dates = fetch_all_dates
     stocks = fetch_all_stock_number
     fetch_tdcc_all_data(dates, stocks)
@@ -45,8 +46,8 @@ def reset_tdcc_table
 end
 
 def reset_price_table
-    @client.query("DROP TABLE IF EXISTS #{@stock_price_table_name};")
-    @client.query("CREATE TABLE #{@stock_price_table_name} (stock_number VARCHAR(255), date DATE, closing_price FLOAT, type VARCHAR(255));")
+    @client.query("DROP TABLE IF EXISTS #{@price_table_name};")
+    @client.query("CREATE TABLE #{@price_table_name} (stock_number VARCHAR(255), date DATE, closing_price FLOAT, type VARCHAR(255));")
 end
 
 def reset_db
@@ -65,7 +66,7 @@ def insert_price_table(stock_number, date, closing_price, type)
     puts "date: #{date}"
     puts "closing_price: #{closing_price}"
     puts "type: #{type}"
-    @client.query("INSERT INTO #{@stock_price_table_name} (stock_number, date, closing_price, type)
+    @client.query("INSERT INTO #{@price_table_name} (stock_number, date, closing_price, type)
             VALUES ('#{stock_number}', '#{date}', '#{closing_price}', '#{type}');")
 end
 
@@ -144,8 +145,8 @@ def fetch_all_dates
     return dates
 end
 
-def fetch_db_latest_date
-    date = @client.query("select date from #{@db_name}.#{@tdcc_table_name} order by date DESC limit 1;")
+def fetch_db_latest_date(table_name)
+    date = @client.query("select date from #{@db_name}.#{table_name} order by date DESC limit 1;")
     date_s = date.first["date"].to_s
     return date_s
 end
@@ -161,15 +162,35 @@ def truncate_old_dates(last_date, all_dates)
     end
 end
 
-def fetch_new_data
-    last_date = fetch_db_latest_date
+def update_tdcc_data
+    last_date = fetch_db_latest_date(@tdcc_table_name)
     all_dates = fetch_all_dates
     new_dates = truncate_old_dates(last_date, all_dates)
+    if new_dates.size == 0
+      return
+    end
     all_stocks = fetch_all_stock_number
 
     all_stocks.each do |stock|
         new_dates.each do |date|
             fetch_tdcc_single_date(stock, date)
+        end
+    end
+end
+
+def update_price_data
+    last_date = fetch_db_latest_date(@price_table_name)
+    all_dates = fetch_all_dates
+
+    new_dates = truncate_old_dates(last_date, all_dates)
+    if new_dates.size == 0
+      return
+    end
+
+    all_stocks = fetch_all_stock_number
+    all_stocks.each do |stock|
+        new_dates.each do |date|
+            fetch_price(stock, date)
         end
     end
 end
@@ -218,9 +239,6 @@ def fetch_price(stkno, date)
         result = fetch_otc(stkno, date)
         if result == false
             puts "#{stkno} data not found in counter market"
-            # if stkno != '1455'
-            #     puts "!!!"
-            # end
             fetch_stock_exchange(stkno, date)
         end
     rescue Exception => e
@@ -233,14 +251,27 @@ def fetch_price(stkno, date)
 
 end
 
+def change_date_format(date)
+  if date.length == 8 # assume date == YYYYMMDD
+    return date[0, 4] + "/" + date[4, 2]
+  end
+end
+
 def fetch_stock_exchange(stock, date)
+    # date format: "YYYY/MM" example: "2016/07"
     # 上市
     # example:
     # http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY_AVG/STOCK_DAY_AVG2.php?STK_NO=2303&myear=2016&mmon=02&type=csv
-    puts "Fetch stock exchange #{stock}, #{date}"
-    year_month = date.split('/')
-    year = tw_to_ad(year_month[0]).to_s
+    if !date.include?("/")
+      date = change_date_format(date)
+      year_month = date.split('/')
+      year = year_month[0]
+    else
+      year_month = date.split('/')
+      year = tw_to_ad(year_month[0]).to_s
+    end
     month = year_month[1].to_s
+    puts "Fetch stock exchange #{stock}, #{date}"
     url = @exchange_market_price + '?STK_NO=' + stock + '&myear=' + year + '&mmon=' + month + '&type=csv'
     open_url = open(url)
     web_data = Nokogiri::HTML(open_url)
@@ -259,6 +290,7 @@ end
 
 # OTC: over-the-counter
 def fetch_otc(stock, date)
+    # date can be: "105/07", "20160702", or "201607"
     # 上櫃
     # example:
     # http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43_download.php?l=zh-tw&d=105/07&stkno=3662&s=0,asc,0
@@ -306,7 +338,8 @@ if ARGV.size < 1
   puts "Available parameters: #{update_tdcc_param}, #{rebuild_param}"
 else
   if ARGV[0] == update_tdcc_param
-    fetch_new_data
+    update_tdcc_data
+    update_price_data
   elsif ARGV[0] == rebuild_param
     rebuild_all
   else
