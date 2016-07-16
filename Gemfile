@@ -1,5 +1,4 @@
 source 'https://rubygems.org'
 
-gem 'nokogiri'
-
-gem 'mysql2'
+# Specify your gem's dependencies in tdcc.gemspec
+gemspec

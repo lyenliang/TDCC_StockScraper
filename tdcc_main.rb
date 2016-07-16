@@ -2,6 +2,8 @@ require 'mysql2'
 require 'open-uri'
 require 'nokogiri'
 
+require 'tdcc'
+
 @db_host = "localhost"
 @db_user = "lyenliang"
 @db_pass = "somepass"
@@ -29,7 +31,7 @@ def rebuild_all()
     clear_tables()
     reset_price_table
     dates = fetch_all_dates
-    stocks = fetch_all_stock_number
+    stocks = Tdcc.fetch_all_stock_number
     fetch_tdcc_all_data(dates, stocks)
     fetch_price_all_data(dates, stocks)
 end
@@ -70,24 +72,24 @@ def insert_price_table(stock_number, date, closing_price, type)
             VALUES ('#{stock_number}', '#{date}', '#{closing_price}', '#{type}');")
 end
 
-def fetch_all_stock_number
-    exchange = fetch_list(@exchange_list_url)
-    otc = fetch_list(@otc_list_url)
-    # emerging = fetch_list(@emerging_list_url)
-    return [*exchange, *otc]
-end
+#def fetch_all_stock_number
+#    exchange = fetch_list(@exchange_list_url)
+#    otc = fetch_list(@otc_list_url)
+#    # emerging = fetch_list(@emerging_list_url)
+#    return [*exchange, *otc]
+#end
 
-def fetch_list(target_url)
-  result_list = []
-  web_data = Nokogiri::HTML(open(target_url))
-  trs = web_data.css("tr")
-  trs.each do |tr|
-    if /^\d{4}\s/.match(tr.inner_text)
-      result_list << tr.inner_text[0, 4]
-    end
-  end
-  return result_list
-end
+#def fetch_list(target_url)
+#  result_list = []
+#  web_data = Nokogiri::HTML(open(target_url))
+#  trs = web_data.css("tr")
+#  trs.each do |tr|
+#    if /^\d{4}\s/.match(tr.inner_text)
+#      result_list << tr.inner_text[0, 4]
+#    end
+#  end
+#  return result_list
+#end
 
 def fetch_tdcc_all_data(dates, stocks)
     stocks.each do |stock|
@@ -169,7 +171,7 @@ def update_tdcc_data
     if new_dates.size == 0
       return
     end
-    all_stocks = fetch_all_stock_number
+    all_stocks = Tdcc.fetch_all_stock_number
 
     all_stocks.each do |stock|
         new_dates.each do |date|
@@ -187,7 +189,7 @@ def update_price_data
       return
     end
 
-    all_stocks = fetch_all_stock_number
+    all_stocks = Tdcc.fetch_all_stock_number
     all_stocks.each do |stock|
         new_dates.each do |date|
             fetch_price(stock, date)
