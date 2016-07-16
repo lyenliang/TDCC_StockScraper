@@ -30,7 +30,7 @@ require 'tdcc'
 def rebuild_all()
     clear_tables()
     reset_price_table
-    dates = fetch_all_dates
+    dates = Tdcc.fetch_all_dates
     stocks = Tdcc.fetch_all_stock_number
     fetch_tdcc_all_data(dates, stocks)
     fetch_price_all_data(dates, stocks)
@@ -71,25 +71,6 @@ def insert_price_table(stock_number, date, closing_price, type)
     @client.query("INSERT INTO #{@price_table_name} (stock_number, date, closing_price, type)
             VALUES ('#{stock_number}', '#{date}', '#{closing_price}', '#{type}');")
 end
-
-#def fetch_all_stock_number
-#    exchange = fetch_list(@exchange_list_url)
-#    otc = fetch_list(@otc_list_url)
-#    # emerging = fetch_list(@emerging_list_url)
-#    return [*exchange, *otc]
-#end
-
-#def fetch_list(target_url)
-#  result_list = []
-#  web_data = Nokogiri::HTML(open(target_url))
-#  trs = web_data.css("tr")
-#  trs.each do |tr|
-#    if /^\d{4}\s/.match(tr.inner_text)
-#      result_list << tr.inner_text[0, 4]
-#    end
-#  end
-#  return result_list
-#end
 
 def fetch_tdcc_all_data(dates, stocks)
     stocks.each do |stock|
@@ -134,19 +115,6 @@ def fetch_tdcc_single_date(stock, date)
     end
 end
 
-def fetch_all_dates
-    # return a list of all the dates
-    dates = []
-    open_url = open(@tdcc_url)
-    date_tmp = Nokogiri::HTML(open_url).css("option")
-
-    date_tmp.each do |date_t|
-        dates << date_t.inner_text
-    end
-
-    return dates
-end
-
 def fetch_db_latest_date(table_name)
     date = @client.query("select date from #{@db_name}.#{table_name} order by date DESC limit 1;")
     date_s = date.first["date"].to_s
@@ -166,7 +134,7 @@ end
 
 def update_tdcc_data
     last_date = fetch_db_latest_date(@tdcc_table_name)
-    all_dates = fetch_all_dates
+    all_dates = Tdcc.fetch_all_dates
     new_dates = truncate_old_dates(last_date, all_dates)
     if new_dates.size == 0
       return
@@ -182,7 +150,7 @@ end
 
 def update_price_data
     last_date = fetch_db_latest_date(@price_table_name)
-    all_dates = fetch_all_dates
+    all_dates = Tdcc.fetch_all_dates
 
     new_dates = truncate_old_dates(last_date, all_dates)
     if new_dates.size == 0
